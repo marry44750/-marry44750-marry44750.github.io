@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>线程正确结束的两种方式</title>
+      <link href="posts/c767.html"/>
+      <url>posts/c767.html</url>
+      
+        <content type="html"><![CDATA[]]></content>
+      
+      
+      <categories>
+          
+          <category> 示例 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 示例 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>线程间通信三种方式代码实现</title>
       <link href="posts/459b.html"/>
       <url>posts/459b.html</url>
