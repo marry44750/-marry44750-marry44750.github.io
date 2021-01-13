@@ -542,7 +542,13 @@
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>  <strong>interrupt()**方法会中断线程，设置中断标志位，</strong>Thread.currentThread().isInterrupted()** 判断线程状态，在合适的时间停止线程。==特别注意：==sleep方法会剖出中断异常，清除中断标志，如果想继续后续处理，保证数据一致性，就不能在catch块中退出线程，因此需要再次设置自己中断标志，才能时一次执行完整再正确结束</p>
-<p>​            </p>
+<p>  与线程中断的API有以下三个：</p>
+<ul>
+<li>public void interrupt()</li>
+<li>public static boolean interrupted()</li>
+<li>public boolean isInterrupted()</li>
+</ul>
+<p>​        需要注意isInterrupted()只返回线程中断标志，但 interrupted()同时会清除标志位    </p>
 <h2 id="2、设置标志位"><a href="#2、设置标志位" class="headerlink" title="2、设置标志位"></a>2、设置标志位</h2><pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">ThreadStopTest</span> <span class="token punctuation">{</span>
 	<span class="token keyword">private</span> <span class="token keyword">volatile</span> <span class="token keyword">static</span> <span class="token keyword">boolean</span> flag <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
 	<span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">Exception</span> <span class="token punctuation">{</span>
