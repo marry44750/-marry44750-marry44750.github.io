@@ -6,7 +6,7 @@
   <link href="https://marry44750.github.io/atom.xml" rel="self"/>
   
   <link href="https://marry44750.github.io/"/>
-  <updated>2021-01-12T12:31:20.110Z</updated>
+  <updated>2021-01-13T03:32:24.877Z</updated>
   <id>https://marry44750.github.io/</id>
   
   <author>
@@ -17,23 +17,27 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>Hello World</title>
-    <link href="https://marry44750.github.io/posts/3eeb.html"/>
-    <id>https://marry44750.github.io/posts/3eeb.html</id>
-    <published>2021-01-12T10:15:42.917Z</published>
-    <updated>2021-01-12T12:31:20.110Z</updated>
+    <title>线程间通信三种方式代码实现</title>
+    <link href="https://marry44750.github.io/posts/459b.html"/>
+    <id>https://marry44750.github.io/posts/459b.html</id>
+    <published>2021-01-13T02:27:32.000Z</published>
+    <updated>2021-01-13T03:32:24.877Z</updated>
     
     
       
       
         
         
-    <summary type="html">&lt;p&gt;Welcome to &lt;a href=&quot;https://hexo.io/&quot;&gt;Hexo&lt;/a&gt;! This is your very first post. Check &lt;a href=&quot;https://hexo.io/docs/&quot;&gt;documentation&lt;/a&gt;</summary>
+    <summary type="html">&lt;h1 id=&quot;一、jdk弃用suspend-resume方式&quot;&gt;&lt;a href=&quot;#一、jdk弃用suspend-resume方式&quot; class=&quot;headerlink&quot;</summary>
         
       
     
     
     
+    <category term="多线程基础" scheme="https://marry44750.github.io/categories/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%9F%BA%E7%A1%80/"/>
+    
+    
+    <category term="多线程" scheme="https://marry44750.github.io/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/"/>
     
   </entry>
   
