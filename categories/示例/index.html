@@ -414,7 +414,10 @@
                     <div class="card-content article-content">
                         <div class="summary block-with-text">
                             
-                                
+                                一、错误的方式  禁止使用stop方法停止线程,强制中断线程会出现不可预料的程序错误，如下示例会演示出现问题的可能：
+public class Task implements Runnable {
+	private int i = 0;
+	
                             
                         </div>
                         <div class="publish-info">
