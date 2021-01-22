@@ -861,7 +861,7 @@ Found 1 items
 <th>节点</th>
 <th>NN</th>
 <th>NN</th>
-<th>SNN</th>
+<th>JN</th>
 <th>DN</th>
 <th>ZKFC</th>
 <th>ZK</th>
@@ -889,7 +889,7 @@ Found 1 items
 <td>node3</td>
 <td></td>
 <td></td>
-<td></td>
+<td>√</td>
 <td>√</td>
 <td></td>
 <td>√</td>
@@ -898,7 +898,7 @@ Found 1 items
 <td>node4</td>
 <td></td>
 <td></td>
-<td></td>
+<td>√</td>
 <td>√</td>
 <td></td>
 <td>√</td>
@@ -950,7 +950,7 @@ Found 1 items
 <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>property</span><span class="token punctuation">&gt;</span></span>
 <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>property</span><span class="token punctuation">&gt;</span></span>
   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>name</span><span class="token punctuation">&gt;</span></span>dfs.namenode.shared.edits.dir<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>name</span><span class="token punctuation">&gt;</span></span>
-  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>value</span><span class="token punctuation">&gt;</span></span>qjournal://node1:8485;node2:8485/mycluster<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>value</span><span class="token punctuation">&gt;</span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>value</span><span class="token punctuation">&gt;</span></span>qjournal://node2:8485;node3:8485;node4:8485/mycluster<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>value</span><span class="token punctuation">&gt;</span></span>
 <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>property</span><span class="token punctuation">&gt;</span></span>
 <span class="token comment">&lt;!--qjournal数据存储位置--&gt;</span>
 <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>property</span><span class="token punctuation">&gt;</span></span>
@@ -980,22 +980,27 @@ Found 1 items
  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>property</span><span class="token punctuation">&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre></li>
 </ul>
 </li>
+<li><p>分发配置到各个节点</p>
+</li>
 </ul>
 </li>
 <li><p>启动集群</p>
 <ul>
 <li><p>先启动JN</p>
 <pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">hadoop-daemon.sh start journalnode<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></li>
-<li><p>选择一个NN做格式化</p>
-<pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">hdfs namenode -format #只有第一次搭建集群时做<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></li>
+<li><p>选择一个NN做格式化并启动</p>
+<pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">hdfs namenode -format #只有第一次搭建集群时做
+hadoop-daemon.sh start namenode<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></li>
 <li><p>在另外一台NN中</p>
 <pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">hdfs namenode -bootstrapStandby<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></li>
 <li><p>格式化zk</p>
 <pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">hdfs zkfc -formatZK	#只有第一次搭建集群时做<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></li>
 <li><p>启动</p>
-<pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">start-dfs.sh<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-</li>
+<pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">start-dfs.sh<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></li>
 </ul>
+</li>
+<li><p>验证HA</p>
+<p>。。。</p>
 </li>
 </ul>
 
