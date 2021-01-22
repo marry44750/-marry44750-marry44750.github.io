@@ -6,7 +6,7 @@
   <link href="https://marry44750.github.io/atom.xml" rel="self"/>
   
   <link href="https://marry44750.github.io/"/>
-  <updated>2021-01-13T09:28:32.576Z</updated>
+  <updated>2021-01-22T07:36:49.835Z</updated>
   <id>https://marry44750.github.io/</id>
   
   <author>
@@ -15,6 +15,57 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>大数据学习之HDFS</title>
+    <link href="https://marry44750.github.io/posts/e1db.html"/>
+    <id>https://marry44750.github.io/posts/e1db.html</id>
+    <published>2021-01-18T12:48:35.000Z</published>
+    <updated>2021-01-22T07:36:49.835Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h2 id=&quot;一、存储模型&quot;&gt;&lt;a href=&quot;#一、存储模型&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="大数据" scheme="https://marry44750.github.io/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/"/>
+    
+    
+    <category term="大数据" scheme="https://marry44750.github.io/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>ClickHouse学习笔记</title>
+    <link href="https://marry44750.github.io/posts/3a77.html"/>
+    <id>https://marry44750.github.io/posts/3a77.html</id>
+    <published>2021-01-15T00:50:34.000Z</published>
+    <updated>2021-01-22T07:47:37.248Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;​    &lt;/p&gt;
+&lt;h2 id=&quot;一、初识&quot;&gt;&lt;a href=&quot;#一、初识&quot; class=&quot;headerlink&quot; title=&quot;一、初识&quot;&gt;&lt;/a&gt;一、初识&lt;/h2&gt;&lt;p&gt;​   </summary>
+        
+      
+    
+    
+    
+    <category term="数据库" scheme="https://marry44750.github.io/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/"/>
+    
+    
+    <category term="大数据" scheme="https://marry44750.github.io/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/"/>
+    
+  </entry>
   
   <entry>
     <title>线程正确结束的两种方式</title>
