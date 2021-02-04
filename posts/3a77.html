@@ -926,7 +926,36 @@ systemctl restart clickhouse-server<span aria-hidden="true" class="line-numbers-
 
 </li>
 </ul>
-<h5 id="3-2-2-MySQL"><a href="#3-2-2-MySQL" class="headerlink" title="3.2.2 MySQL"></a>3.2.2 MySQL</h5><h2 id="四、数据类型"><a href="#四、数据类型" class="headerlink" title="四、数据类型"></a>四、数据类型</h2>
+<h5 id="3-2-2-Kafka"><a href="#3-2-2-Kafka" class="headerlink" title="3.2.2 Kafka"></a>3.2.2 Kafka</h5><p>  通过改引擎可以建立CH到kafka的数据流，消费kafka的数据进行转换、聚合等操作</p>
+<pre class="line-numbers language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">CREATE</span> <span class="token keyword">TABLE</span> <span class="token punctuation">[</span><span class="token keyword">IF</span> <span class="token operator">NOT</span> <span class="token keyword">EXISTS</span><span class="token punctuation">]</span> <span class="token punctuation">[</span>db<span class="token punctuation">.</span><span class="token punctuation">]</span>table_name <span class="token punctuation">[</span><span class="token keyword">ON</span> CLUSTER cluster<span class="token punctuation">]</span>
+<span class="token punctuation">(</span>
+    name1 <span class="token punctuation">[</span>type1<span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token keyword">DEFAULT</span><span class="token operator">|</span>MATERIALIZED<span class="token operator">|</span>ALIAS expr1<span class="token punctuation">]</span> <span class="token punctuation">[</span>TTL expr1<span class="token punctuation">]</span><span class="token punctuation">,</span>
+    name2 <span class="token punctuation">[</span>type2<span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token keyword">DEFAULT</span><span class="token operator">|</span>MATERIALIZED<span class="token operator">|</span>ALIAS expr2<span class="token punctuation">]</span> <span class="token punctuation">[</span>TTL expr2<span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+<span class="token punctuation">)</span> <span class="token keyword">ENGINE</span> <span class="token operator">=</span>Kafka<span class="token punctuation">(</span><span class="token punctuation">)</span> 
+SETTINGS
+  kafka_broker_list <span class="token operator">=</span> <span class="token string">'localhost:9092'</span><span class="token punctuation">,</span>		<span class="token comment">-- 以逗号分隔的 brokers 列表							必填</span>
+  kafka_topic_list <span class="token operator">=</span> <span class="token string">'topic1,topic2'</span><span class="token punctuation">,</span>		<span class="token comment">-- 以逗号分隔的 topic 列表								必填</span>
+  kafka_group_name <span class="token operator">=</span> <span class="token string">'group1'</span><span class="token punctuation">,</span>				<span class="token comment">-- 消费组名称										  必填</span>
+  kafka_format <span class="token operator">=</span> <span class="token string">'JSONEachRow'</span><span class="token punctuation">,</span>				<span class="token comment">-- 消息体格式，使用与 SQL 部分的 FORMAT 函数相同表示方法	 必填</span>
+  kafka_row_delimiter <span class="token operator">=</span> <span class="token string">'\n'</span><span class="token punctuation">,</span>				<span class="token comment">-- 每个消息体（记录）之间的分隔符							选填</span>
+  kafka_schema <span class="token operator">=</span> <span class="token string">''</span><span class="token punctuation">,</span>						<span class="token comment">-- 如果解析格式需要一个 schema 时，此参数必填			   选填</span>
+  kafka_num_consumers <span class="token operator">=</span> <span class="token number">2</span>					<span class="token comment">--单个表的消费者数量。默认值是：1，如果一个消费者的吞吐量不足，则指定更多的消费者。消费者的总数不应该超过 topic 中分区的数量，因为每个分区只能分配一个消费者														 选填</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>场景测试：</p>
+<ul>
+<li><p>kafka创建测试主题</p>
+<pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">kafka-topics.sh --zookeeper 192.168.220.128:2181 --create --replication-factor 1 --partitions 1 --topic ch_test
+[wps@ch5 bin]$ kafka-topics.sh --zookeeper 192.168.220.128:2181 --list
+ch_test<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre></li>
+<li><p>创建consumer表作为kafka的消费者</p>
+<pre class="line-numbers language-none"><code class="language-none">  <span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+
+
+
+</li>
+</ul>
+<h2 id="四、数据类型"><a href="#四、数据类型" class="headerlink" title="四、数据类型"></a>四、数据类型</h2>
                 
             </div>
             <hr/>

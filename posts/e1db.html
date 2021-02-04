@@ -1003,6 +1003,131 @@ hadoop-daemon.sh start namenode<span aria-hidden="true" class="line-numbers-rows
 <p>。。。</p>
 </li>
 </ul>
+<h2 id="9、权限"><a href="#9、权限" class="headerlink" title="9、权限"></a>9、权限</h2><h3 id="1、hdfs文件系统"><a href="#1、hdfs文件系统" class="headerlink" title="1、hdfs文件系统"></a>1、hdfs文件系统</h3><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">hdfs dfs -mkdir -p /user/root	#创建默认用户home<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+
+<img src="/posts/e1db/file.png" class="">
+
+<pre class="line-numbers language-sh" data-language="sh"><code class="language-sh">drwxr-xr-x	root	supergroup	0 B	Jan 22 20:07	0	0 B	user	
+drwxr-xr-x	root	supergroup	0 B	Jan 21 16:15	0	0 B	wps<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<ul>
+<li><p>类似linux目录结构,有用户、权限的概念</p>
+</li>
+<li><p>但本身没有创建用户的命令或者接口，默认信任启动端，使用客户端提供的用户，也是超级用户</p>
+</li>
+<li><p>但权限是自己控制的，来自于hdfs的超级用户</p>
+</li>
+<li><p>一般企业级不会以root启动软件服务</p>
+</li>
+<li><p>新增用户启动服务，并创建测试目录test</p>
+<img src="/posts/e1db/user.jpg" class="">
+
+<p>默认创建目录所有者为当前超级用户，组为supergroup</p>
+</li>
+</ul>
+<h3 id="2、修改相应权限"><a href="#2、修改相应权限" class="headerlink" title="2、修改相应权限"></a>2、修改相应权限</h3><ul>
+<li><p>修改所有组</p>
+<pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">hdfs dfs -chown wps:testgroup /test<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></li>
+<li><p>修改权限为所有者可读写可执行，所有组可读写</p>
+<pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">hdfs dfs -chmod 770 /test<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></li>
+<li><p>NN所在节点添加用户测试</p>
+<pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">useradd test
+groupadd testgroup
+usermod -a -G testgroup test
+[root@ch5 wps]# id test
+uid=1001(test) gid=1001(test) 组=1001(test),1002(testgroup)
+su test
+[test@ch5 wps]$ hdfs dfs -mkdir /test/t1
+mkdir: Permission denied: user=test, access=EXECUTE, inode="/test":wps:testgroup:drwxrwx---<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>此时test用户虽然加入了testgroup组，但没有更新到hdfs上，依旧没有权限</p>
+</li>
+<li><p>刷新hdfs组</p>
+<pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">[root@ch5 wps]# hdfs dfsadmin -refreshUserToGroupsMappings
+Refresh user to groups mapping successful<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></li>
+<li><p>再次测试test用户</p>
+<pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">[test@ch5 wps]$ hdfs dfs -mkdir /test/t1<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<h2 id="10、API"><a href="#10、API" class="headerlink" title="10、API"></a>10、API</h2></li>
+</ul>
+<p>  将core-site.xml和hdfs-site.xml拷贝至工程resources目录下</p>
+<pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token keyword">package</span> <span class="token namespace">com<span class="token punctuation">.</span>wps<span class="token punctuation">.</span>dfs</span><span class="token punctuation">;</span>
+
+<span class="token keyword">import</span> <span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>hadoop<span class="token punctuation">.</span>conf<span class="token punctuation">.</span></span><span class="token class-name">Configuration</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>hadoop<span class="token punctuation">.</span>fs<span class="token punctuation">.</span></span><span class="token operator">*</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>hadoop<span class="token punctuation">.</span>hdfs<span class="token punctuation">.</span>protocol<span class="token punctuation">.</span></span><span class="token class-name">LocatedBlock</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>hadoop<span class="token punctuation">.</span>io<span class="token punctuation">.</span></span><span class="token class-name">IOUtils</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token namespace">org<span class="token punctuation">.</span>junit<span class="token punctuation">.</span></span><span class="token class-name">After</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token namespace">org<span class="token punctuation">.</span>junit<span class="token punctuation">.</span></span><span class="token class-name">Before</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token namespace">org<span class="token punctuation">.</span>junit<span class="token punctuation">.</span></span><span class="token class-name">Test</span><span class="token punctuation">;</span>
+
+<span class="token keyword">import</span> <span class="token namespace">java<span class="token punctuation">.</span>io<span class="token punctuation">.</span></span><span class="token class-name">BufferedInputStream</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token namespace">java<span class="token punctuation">.</span>io<span class="token punctuation">.</span></span><span class="token class-name">FileInputStream</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token namespace">java<span class="token punctuation">.</span>io<span class="token punctuation">.</span></span><span class="token class-name">FileNotFoundException</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token namespace">java<span class="token punctuation">.</span>io<span class="token punctuation">.</span></span><span class="token class-name">IOException</span><span class="token punctuation">;</span>
+
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">TestDfs</span> <span class="token punctuation">{</span>
+
+    <span class="token keyword">public</span> <span class="token class-name">Configuration</span> conf <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">public</span> <span class="token class-name">FileSystem</span> fs <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+
+
+    <span class="token annotation punctuation">@Before</span>
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">IOException</span> <span class="token punctuation">{</span>
+        <span class="token class-name">System</span><span class="token punctuation">.</span><span class="token function">setProperty</span><span class="token punctuation">(</span><span class="token string">"HADOOP_USER_NAME"</span><span class="token punctuation">,</span><span class="token string">"wps"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">/**
+         * 构建conf两种方式
+         * 1、loadDefaults:true，加载resource下的配置文件
+         * 2、loadDefaults:false，手动设置
+         */</span>
+        conf <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Configuration</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        fs <span class="token operator">=</span> <span class="token class-name">FileSystem</span><span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>conf<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token annotation punctuation">@Test</span>
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">mkdir</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">IOException</span> <span class="token punctuation">{</span>
+        <span class="token class-name">Path</span> path <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Path</span><span class="token punctuation">(</span><span class="token string">"/user/wps/t1"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span>fs<span class="token punctuation">.</span><span class="token function">exists</span><span class="token punctuation">(</span>path<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+            fs<span class="token punctuation">.</span><span class="token function">mkdirs</span><span class="token punctuation">(</span>path<span class="token punctuation">)</span> <span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token annotation punctuation">@Test</span>
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">upload</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">IOException</span> <span class="token punctuation">{</span>
+        <span class="token class-name">BufferedInputStream</span> inputStream <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">BufferedInputStream</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">FileInputStream</span><span class="token punctuation">(</span><span class="token string">"./test.txt"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token class-name">Path</span> path <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Path</span><span class="token punctuation">(</span><span class="token string">"/user/wps/t1/test.txt"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token class-name">FSDataOutputStream</span> outputStream <span class="token operator">=</span> fs<span class="token punctuation">.</span><span class="token function">create</span><span class="token punctuation">(</span>path<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token class-name">IOUtils</span><span class="token punctuation">.</span><span class="token function">copyBytes</span><span class="token punctuation">(</span>inputStream<span class="token punctuation">,</span>outputStream<span class="token punctuation">,</span>conf<span class="token punctuation">,</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token annotation punctuation">@Test</span>
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">upload2</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">IOException</span> <span class="token punctuation">{</span>
+        <span class="token class-name">Path</span> in <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Path</span><span class="token punctuation">(</span><span class="token string">"./test.txt"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token class-name">Path</span> out <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Path</span><span class="token punctuation">(</span><span class="token string">"/user/wps/t1/test2.txt"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        fs<span class="token punctuation">.</span><span class="token function">copyFromLocalFile</span><span class="token punctuation">(</span>in<span class="token punctuation">,</span>out<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token annotation punctuation">@Test</span>
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">blocks</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">IOException</span> <span class="token punctuation">{</span>
+        <span class="token class-name">Path</span> path <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Path</span><span class="token punctuation">(</span><span class="token string">"/user/wps/t1/test.txt"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token class-name">FileStatus</span> fileStatus <span class="token operator">=</span> fs<span class="token punctuation">.</span><span class="token function">getFileStatus</span><span class="token punctuation">(</span>path<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token class-name">BlockLocation</span><span class="token punctuation">[</span><span class="token punctuation">]</span> blockLocations <span class="token operator">=</span> fs<span class="token punctuation">.</span><span class="token function">getFileBlockLocations</span><span class="token punctuation">(</span>fileStatus<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> fileStatus<span class="token punctuation">.</span><span class="token function">getLen</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token class-name">BlockLocation</span> location <span class="token operator">:</span> blockLocations<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token class-name">LocatedBlock</span> block <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token class-name">HdfsBlockLocation</span><span class="token punctuation">)</span> location<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getLocatedBlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>block<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+
+
+    <span class="token annotation punctuation">@After</span>
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">IOException</span> <span class="token punctuation">{</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>fs <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+            fs<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+
 
                 
             </div>
@@ -1503,18 +1628,17 @@ hadoop-daemon.sh start namenode<span aria-hidden="true" class="line-numbers-rows
 <article id="prenext-posts" class="prev-next articles">
     <div class="row article-row">
         
-        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
+        <div class="article col s12 m6" data-aos="fade-up">
             <div class="article-badge left-badge text-color">
-                <i class="far fa-dot-circle"></i>&nbsp;本篇
-            </div>
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
             <div class="card">
-                <a href="/posts/e1db.html">
+                <a href="/posts/96b.html">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/5.jpg" class="responsive-img" alt="大数据学习之HDFS">
+                        <img src="/medias/featureimages/22.jpg" class="responsive-img" alt="MapReduce&amp;yarn学习笔记">
                         
-                        <span class="card-title">大数据学习之HDFS</span>
+                        <span class="card-title">MapReduce&amp;yarn学习笔记</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
@@ -1524,9 +1648,9 @@ hadoop-daemon.sh start namenode<span aria-hidden="true" class="line-numbers-rows
                         
                     </div>
                     <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2021-01-18
-                            </span>
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2021-01-26
+                        </span>
                         <span class="publish-author">
                             
                             <i class="fas fa-bookmark fa-fw icon-category"></i>
@@ -1539,7 +1663,6 @@ hadoop-daemon.sh start namenode<span aria-hidden="true" class="line-numbers-rows
                         </span>
                     </div>
                 </div>
-
                 
                 <div class="card-action article-tags">
                     
